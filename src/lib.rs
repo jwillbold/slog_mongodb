@@ -1,3 +1,21 @@
+// {{{ Crate docs
+//! MongoDB `Drain` for `slog-rs`
+//!
+//! ```
+//! use slog::*;
+//!
+//! let client = mongodb::Client::with_uri_str("mongodb://localhost:27017/").unwrap();
+//! let db = client.database("some_db");
+//! let logs = db.collection("logs");
+//!
+//! let drain = slog_mongodb::MongoDBDrain::new(logs, std::time::Duration::from_secs(5)).fuse();
+//! let drain = slog_async::Async::new(drain).build().fuse();
+//!
+//! let log = Logger::root(drain, o!());
+//! info!(log, "Logging ready!");
+//! ```
+// }}}
+
 extern crate mongodb;
 extern crate bson;
 extern crate serde;
@@ -19,6 +37,22 @@ use slog_serde::{SerdeSerializer};
 use mongodb::{Collection, options::InsertManyOptions};
 
 
+/// MongoDB `Drain` for `slog-rs`.
+/// Buffers incoming log messages and stores them at a configurable time interval.
+///
+/// ```
+/// use slog::*;
+///
+/// let client = mongodb::Client::with_uri_str("mongodb://localhost:27017/").unwrap();
+/// let db = client.database("some_db");
+/// let logs = db.collection("logs");
+///
+/// let drain = slog_mongodb::MongoDBDrain::new(logs, std::time::Duration::from_secs(5)).fuse();
+/// let drain = slog_async::Async::new(drain).build().fuse();
+///
+/// let log = Logger::root(drain, o!());
+/// info!(log, "Logging ready!");
+// ```
 pub struct MongoDBDrain {
     values: Vec<OwnedKVList>,
     collection: Collection,
@@ -67,7 +101,7 @@ impl slog::Drain for MongoDBDrain  {
     }
 }
 
-
+/// MongoDB `Drain` builder
 pub struct MongoDBDrainBuilder {
     values: Vec<OwnedKVList>,
     collection: Collection,
@@ -88,8 +122,8 @@ impl MongoDBDrainBuilder {
         MongoDBDrain {
             values: self.values,
             collection: self.collection,
-            buffer: RefCell::new(Vec::with_capacity(self.buffer_size)),
-            drain_interval: self.max_duration,
+            buffer: RefCell::new(Vec::with_capacity(50)),
+            drain_interval: self.drain_interval,
             last_drained: RefCell::new(Instant::now())
         }
     }
