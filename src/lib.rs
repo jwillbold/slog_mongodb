@@ -8,6 +8,7 @@ mod slog_serde;
 
 use std::{io, time};
 use std::cell::RefCell;
+use std::time::Instant;
 
 use slog::{FnValue, PushFnValue};
 use slog::{OwnedKVList, KV, SendSyncRefUnwindSafeKV};
@@ -16,21 +17,20 @@ use slog::{Record, o};
 use slog_serde::{SerdeSerializer};
 
 use mongodb::{Collection, options::InsertManyOptions};
-use std::time::Instant;
 
 
 pub struct MongoDBDrain {
     values: Vec<OwnedKVList>,
     collection: Collection,
     buffer: RefCell<Vec<bson::Document>>,
-    buffer_size: usize,
-    max_duration: time::Duration,
+    drain_interval: time::Duration,
     last_drained: RefCell<time::Instant>
 }
 
 impl MongoDBDrain {
-    pub fn new(collection: Collection, buffer_size: usize, max_duration: time::Duration) -> MongoDBDrain {
-        MongoDBDrainBuilder::new(collection, buffer_size, max_duration).with_default_keys().build()
+    pub fn new(collection: Collection, drain_interval: time::Duration)
+        -> MongoDBDrain  {
+        MongoDBDrainBuilder::new(collection, drain_interval).with_default_keys().build()
     }
 }
 
@@ -52,19 +52,13 @@ impl slog::Drain for MongoDBDrain  {
         let res = serializer.end().map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
 
         if let bson::Bson::Document(log) = res {
-            if self.buffer_size <= 1{
-                let _ = self.collection.insert_one(log, None)
-                    .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-            } else {
-                self.buffer.borrow_mut().push(log);
-                if self.buffer.borrow().len() >= self.buffer_size ||
-                    time::Instant::now().saturating_duration_since(*self.last_drained.borrow()) >= self.max_duration
-                {
-                    self.collection.insert_many(self.buffer.borrow_mut().drain(..),
-                                                Some(InsertManyOptions::builder().ordered(false).build())
-                    ).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-                    self.last_drained.replace(Instant::now());
-                }
+            self.buffer.borrow_mut().push(log);
+            if time::Instant::now().saturating_duration_since(*self.last_drained.borrow()) >= self.drain_interval
+            {
+                self.collection.insert_many(self.buffer.borrow_mut().drain(..),
+                    Some(InsertManyOptions::builder().ordered(false).build())
+                ).map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+                self.last_drained.replace(Instant::now());
             }
             Ok(())
         } else {
@@ -77,17 +71,15 @@ impl slog::Drain for MongoDBDrain  {
 pub struct MongoDBDrainBuilder {
     values: Vec<OwnedKVList>,
     collection: Collection,
-    buffer_size: usize,
-    max_duration: time::Duration,
+    drain_interval: time::Duration,
 }
 
 impl MongoDBDrainBuilder {
-    fn new(collection: Collection, buffer_size: usize, max_duration: time::Duration) -> Self {
+    fn new(collection: Collection, drain_interval: time::Duration) -> Self {
         MongoDBDrainBuilder {
             values: vec![],
             collection,
-            buffer_size,
-            max_duration
+            drain_interval
         }
     }
 
@@ -97,8 +89,7 @@ impl MongoDBDrainBuilder {
             values: self.values,
             collection: self.collection,
             buffer: RefCell::new(Vec::with_capacity(self.buffer_size)),
-            buffer_size: self.buffer_size,
-            max_duration: self.max_duration,
+            drain_interval: self.max_duration,
             last_drained: RefCell::new(Instant::now())
         }
     }
