@@ -102,6 +102,19 @@ impl slog::Drain for MongoDBDrain  {
 }
 
 /// MongoDB `Drain` builder
+///
+/// ```
+/// use slog::*;
+///
+/// let client = mongodb::Client::with_uri_str("mongodb://localhost:27017/").unwrap();
+/// let db = client.database("some_db");
+/// let logs = db.collection("logs");
+///
+/// let drain = slog_mongodb::MongoDBDrainBuilder::new(logs, std::time::Duration::from_secs(5))
+///                 .add_add_key_value(o!("key" => "value")).build();
+/// let drain = slog_async::Async::new(drain).build().fuse();
+/// // ...
+/// ```
 pub struct MongoDBDrainBuilder {
     values: Vec<OwnedKVList>,
     collection: Collection,
@@ -109,7 +122,7 @@ pub struct MongoDBDrainBuilder {
 }
 
 impl MongoDBDrainBuilder {
-    fn new(collection: Collection, drain_interval: time::Duration) -> Self {
+    pub fn new(collection: Collection, drain_interval: time::Duration) -> Self {
         MongoDBDrainBuilder {
             values: vec![],
             collection,

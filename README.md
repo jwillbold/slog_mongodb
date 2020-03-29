@@ -38,7 +38,8 @@ fn main() {
     let db = client.database("some_db");
     let logs = db.collection("logs");
     
-    let drain = TODO
+    let drain = MongoDBDrainBuilder::new(logs, std::time::Duration::from_secs(5))
+            .add_add_key_value(o!("key" => "value")).build();
     let drain = slog_async::Async::new(drain).build().fuse();
     
     let log = Logger::root(drain, o!());
