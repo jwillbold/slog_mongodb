@@ -12,7 +12,7 @@
 //! let drain = slog_async::Async::new(drain).build().fuse();
 //!
 //! let log = Logger::root(drain, o!());
-//! info!(log, "Logging ready!");
+//! info!(log, "Hello MongoDB!");
 //! ```
 // }}}
 

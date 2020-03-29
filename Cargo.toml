@@ -1,8 +1,16 @@
 [package]
 name = "slog_mongodb"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Johannes Willbold <johannes.willbold@gmail.de>"]
 edition = "2018"
+readme = "../README.md"
+repository  = "https://github.com/jwillbold/slog_mongodb"
+keywords = ["logging", "slog-rs", "mongodb"]
+categories = []
+
+[badges]
+travis-ci = { repository = "jwillbold/slog_mongodb", branch = "master" }
+codecov = { repository = "jwillbold/slog_mongodb", branch = "master", service = "github" }
 
 [dependencies]
 mongodb = "0.9"
