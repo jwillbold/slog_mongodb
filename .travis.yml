@@ -11,7 +11,7 @@ addons:
     packages:
       - libssl-dev
 services:
- - mongodb
+  - mongodb
 os:
   - linux
 matrix:
@@ -29,7 +29,8 @@ before_cache: |
   fi
 
 before_script:
-  - sleep 30 # Give MongoDB some time to setup
+  - sleep 15 # Give MongoDB some time to setup
+  - mongo --eval 'db.version();'
 
 script:
   - cargo build --verbose --all
