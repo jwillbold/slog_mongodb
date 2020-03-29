@@ -111,7 +111,7 @@ impl slog::Drain for MongoDBDrain  {
 /// let logs = db.collection("logs");
 ///
 /// let drain = slog_mongodb::MongoDBDrainBuilder::new(logs, std::time::Duration::from_secs(5))
-///                 .add_add_key_value(o!("key" => "value")).build();
+///                 .add_key_value(o!("key" => "value")).build().fuse();
 /// let drain = slog_async::Async::new(drain).build().fuse();
 /// // ...
 /// ```

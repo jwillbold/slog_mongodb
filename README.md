@@ -12,10 +12,10 @@ fn main() {
     let client = mongodb::Client::with_uri_str("mongodb://localhost:27017/").unwrap();
     let db = client.database("some_db");
     let logs = db.collection("logs");
-    
+
     let drain = slog_mongodb::MongoDBDrain::new(logs, std::time::Duration::from_secs(5)).fuse();
     let drain = slog_async::Async::new(drain).build().fuse();
-    
+
     let log = Logger::root(drain, o!());
     info!(log, "Hello MongoDB!");
 }
@@ -37,11 +37,11 @@ fn main() {
     let client = mongodb::Client::with_uri_str("mongodb://localhost:27017/").unwrap();
     let db = client.database("some_db");
     let logs = db.collection("logs");
-    
+
     let drain = MongoDBDrainBuilder::new(logs, std::time::Duration::from_secs(5))
-            .add_add_key_value(o!("key" => "value")).build();
+            .add_key_value(o!("key" => "value")).build();
     let drain = slog_async::Async::new(drain).build().fuse();
-    
+
     let log = Logger::root(drain, o!());
     info!(log, "Hello MongoDB!");
 }
