@@ -13,11 +13,11 @@ mod test {
     #[test]
     fn test_interval_inserts() {
         let client = mongodb::Client::with_uri_str("mongodb://localhost:27017").unwrap();
-        let db = client.database("some_db");
+        let db = client.database("test");
         let logs = db.collection("logs");
 
-        // Delete existing entries
-        logs.drop(None).unwrap();
+        // Delete existing entries and ignore errors
+        let _ = logs.drop(None);
 
         let drain = slog_mongodb::MongoDBDrain::new(logs.clone(), std::time::Duration::from_secs(10)).fuse();
         let drain = slog_async::Async::new(drain).build().fuse();
