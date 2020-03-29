@@ -3,8 +3,8 @@
 
 # slog_mongodb
 
-MongoDB extension for the Rust logging library [slog-rs](https://github.com/slog-rs/slog).
-Serializes the [slog](https://github.com/slog-rs/slog) key-value pairs to [BSON](https://github.com/mongodb/bson-rust) and stores it in a [MongoDB collection](https://github.com/mongodb/mongo-rust-driver).
+MongoDB extension for Rust's logging library [slog-rs](https://github.com/slog-rs/slog).
+Serializes [slog](https://github.com/slog-rs/slog) messages to [BSON](https://github.com/mongodb/bson-rust) documents and stores them in a [MongoDB collection](https://github.com/mongodb/mongo-rust-driver).
 To reduce the stress on the database, the logged messages are buffered and only sent in configurable time intervals.
 
 ## Usage
