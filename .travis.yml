@@ -10,7 +10,8 @@ addons:
   apt:
     packages:
       - libssl-dev
-services: mongodb
+services:
+ - mongodb
 os:
   - linux
 matrix:
@@ -26,6 +27,10 @@ before_cache: |
   if [[ "$TRAVIS_OS_NAME" == linux && "$TRAVIS_RUST_VERSION" == stable ]]; then
     cargo install cargo-tarpaulin -f
   fi
+
+before_script:
+  - sleep 30 # Give MongoDB some time to setup
+
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
