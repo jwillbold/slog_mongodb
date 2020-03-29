@@ -1,5 +1,9 @@
+[![Build Status](https://travis-ci.com/jwillbold/slog_mongodb.svg?token=hPh87VpFt3MQPwdySdkS&branch=master)](https://travis-ci.com/jwillbold/slog_mongodb)
+[![codecov](https://codecov.io/gh/jwillbold/slog_mongodb/branch/master/graph/badge.svg)](https://codecov.io/gh/jwillbold/slog_mongodb)
+
 # slog_mongodb
 
+MongoDB extension for the Rust logging library [slog-rs](https://github.com/slog-rs/slog).
 Serializes the [slog](https://github.com/slog-rs/slog) key-value pairs to [BSON](https://github.com/mongodb/bson-rust) and stores it in a [MongoDB collection](https://github.com/mongodb/mongo-rust-driver).
 To reduce the stress on the database, the logged messages are buffered and only sent in configurable time intervals.
 

@@ -1,0 +1,13 @@
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  branches:
+    - "!dev"
+
+codecov:
+  require_ci_to_pass: true
+
+# The slog_serde file is more like a dependency, so ignore it.
+ignore:
+  - src/slog_serde.rs
